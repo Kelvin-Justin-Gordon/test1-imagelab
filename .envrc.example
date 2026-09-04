@@ -1,0 +1,1 @@
+export IMAGELAB_DB_DSN=postgres://imagelab_app:yourpassword@localhost:5432/imagelab?sslmode=disable
