@@ -1,3 +1,5 @@
+//images.go defines the Image struct and the database operations (Insert, Get) for the record of an uploaded original file
+
 package data
 
 import (
@@ -9,7 +11,7 @@ import (
 type Image struct {
 	ID               string    `json:"id"`
 	OriginalFilename string    `json:"original_filename"`
-	StoredFilename   string    `json:"-"`
+	StoredFilename   string    `json:"-"` // internal path detail, never exposed to the client
 	MediaType        string    `json:"media_type"`
 	SizeBytes        int64     `json:"size_bytes"`
 	CreatedAt        time.Time `json:"created_at"`
