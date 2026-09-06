@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -40,4 +41,16 @@ func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request)
 
 func (app *application) failedValidationResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {
 	app.errorResponse(w, r, http.StatusUnprocessableEntity, errors)
+}
+
+// requestEntityTooLargeResponse is used when an upload exceeds the 10 MB limit
+func (app *application) requestEntityTooLargeResponse(w http.ResponseWriter, r *http.Request, limitBytes int64) {
+	message := fmt.Sprintf("the uploaded file must not exceed %d bytes", limitBytes)
+	app.errorResponse(w, r, http.StatusRequestEntityTooLarge, message)
+}
+
+// unsupportedMediaTypeResponse is used when the upload file is not a JPEG or PNG
+func (app *application) unsupportedMediaTypeResponse(w http.ResponseWriter, r *http.Request) {
+	message := "the uploaded file must be a JPEG or PNG image"
+	app.errorResponse(w, r, http.StatusUnsupportedMediaType, message)
 }

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/lewisdalwin/gatekeeper/internal/data"
-	"github.com/lewisdalwin/gatekeeper/internal/validator"
+	"github.com/Kelvin-Justin-Gordon/test1-imagelab/internal/data"
+	"github.com/Kelvin-Justin-Gordon/test1-imagelab/internal/validator"
 )
 
 func (app *application) createConsumersHandler(w http.ResponseWriter, r *http.Request) {
