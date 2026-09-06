@@ -1,13 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/lewisdalwin/gatekeeper/internal/data"
-	"github.com/lewisdalwin/gatekeeper/internal/validator"
+	"github.com/Kelvin-Justin-Gordon/test1-imagelab/internal/data"
+	"github.com/Kelvin-Justin-Gordon/test1-imagelab/internal/validator"
 )
 
 func (app *application) createReportHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,10 +32,16 @@ func (app *application) createReportHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	//Payload is now raw JSON on the shared Job struct
+	payload, err := json.Marshal(data.ReportPayload{From: input.From, To: input.To})
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 	job := &data.Job{
-		ConsumerID: input.ConsumerID,
+		ConsumerID: &input.ConsumerID,
 		JobType:    "consumer_activity_report",
-		Payload:    data.ReportPayload{From: input.From, To: input.To},
+		Payload:    payload,
 	}
 	if err := app.models.Jobs.Insert(job); err != nil {
 		if errors.Is(err, data.ErrRecordNotFound) {
