@@ -15,13 +15,16 @@ type ReportPayload struct {
 	To   time.Time `json:"to"`
 }
 
+//Payload is kept as as raw JSON because its shape depends on JobType
+
 type Job struct {
 	ID           string          `json:"-"`
 	PublicID     string          `json:"id"`
-	ConsumerID   string          `json:"consumer_id"`
+	ConsumerID   *string         `json:"consumer_id,omitempty"`
+	ImageID      *string         `json:"image_id,omitempty"`
 	JobType      string          `json:"job_type"`
 	Status       string          `json:"status"`
-	Payload      ReportPayload   `json:"payload"`
+	Payload      json.RawMessage `json:"payload,omitempty"`
 	Result       json.RawMessage `json:"result,omitempty"`
 	ErrorMessage *string         `json:"error_message,omitempty"`
 	StartedAt    *time.Time      `json:"started_at,omitempty"`
@@ -34,15 +37,15 @@ type JobModel struct {
 }
 
 func (m JobModel) Insert(job *Job) error {
-	payload, err := json.Marshal(job.Payload)
-	if err != nil {
-		return err
+	payload := job.Payload
+	if payload == nil {
+		payload = json.RawMessage(`{}`)
 	}
-	query := `INSERT INTO jobs (consumer_id, job_type, payload)
-		VALUES ($1, $2, $3) RETURNING id, public_id, status, created_at`
+	query := `INSERT INTO jobs (consumer_id, image_id, job_type, payload)
+		VALUES ($1, $2, $3, $4) RETURNING id, public_id, status, created_at`
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	err = m.DB.QueryRowContext(ctx, query, job.ConsumerID, job.JobType, payload).Scan(
+	err := m.DB.QueryRowContext(ctx, query, job.ConsumerID, job.ImageID, job.JobType, payload).Scan(
 		&job.ID, &job.PublicID, &job.Status, &job.CreatedAt,
 	)
 	if err != nil {
@@ -56,7 +59,7 @@ func (m JobModel) Insert(job *Job) error {
 }
 
 func (m JobModel) GetByPublicID(publicID string) (*Job, error) {
-	query := `SELECT id, public_id, consumer_id, job_type, status, payload,
+	query := `SELECT id, public_id, consumer_id, image_id, job_type, status, payload,
 		COALESCE(result, 'null'::jsonb), error_message, started_at, completed_at, created_at
 		FROM jobs WHERE public_id = $1`
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -64,7 +67,7 @@ func (m JobModel) GetByPublicID(publicID string) (*Job, error) {
 	var job Job
 	var payload []byte
 	err := m.DB.QueryRowContext(ctx, query, publicID).Scan(&job.ID, &job.PublicID,
-		&job.ConsumerID, &job.JobType, &job.Status, &payload, &job.Result,
+		&job.ConsumerID, &job.ImageID, &job.JobType, &job.Status, &payload, &job.Result,
 		&job.ErrorMessage, &job.StartedAt, &job.CompletedAt, &job.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -72,32 +75,27 @@ func (m JobModel) GetByPublicID(publicID string) (*Job, error) {
 		}
 		return nil, err
 	}
-	if err := json.Unmarshal(payload, &job.Payload); err != nil {
-		return nil, err
-	}
+	job.Payload = json.RawMessage(payload)
 	return &job, nil
 }
 
-func (m JobModel) ClaimNext(ctx context.Context) (*Job, error) {
+func (m JobModel) ClaimNext(ctx context.Context, jobType string) (*Job, error) {
 	tx, err := m.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 	defer tx.Rollback()
-	query := `SELECT id, public_id, consumer_id, job_type, payload FROM jobs
-		WHERE status = 'queued' AND job_type = 'consumer_activity_report'
+	query := `SELECT id, public_id, consumer_id, image_id, job_type, payload FROM jobs
+		WHERE status = 'queued' AND job_type = $1
 		ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1`
 	var job Job
 	var payload []byte
-	if err := tx.QueryRowContext(ctx, query).Scan(&job.ID, &job.PublicID,
-		&job.ConsumerID, &job.JobType, &payload); err != nil {
+	if err := tx.QueryRowContext(ctx, query, jobType).Scan(&job.ID, &job.PublicID,
+		&job.ConsumerID, &job.ImageID, &job.JobType, &payload); err != nil {
 		return nil, err
 	}
-	if err := json.Unmarshal(payload, &job.Payload); err != nil {
-		return nil, err
-	}
-	if _, err := tx.ExecContext(ctx,
-		`UPDATE jobs SET status = 'processing', started_at = now() WHERE id = $1`, job.ID); err != nil {
+	job.Payload = json.RawMessage(payload)
+	if _, err := tx.ExecContext(ctx, `UPDATE jobs SET status = 'processing', started_at = now() WHERE id = $1`, job.ID); err != nil {
 		return nil, err
 	}
 	if err := tx.Commit(); err != nil {

@@ -35,3 +35,14 @@ func (v *Validator) Check(ok bool, key, message string) {
 func Matches(value string, rx *regexp.Regexp) bool {
 	return rx.MatchString(value)
 }
+
+//Checks a decoded format against the fixed set ImageLab accepts. It checks to see is "value" is one of these specific allowed strings
+
+func In(value string, permitted ...string) bool {
+	for _, p := range permitted {
+		if value == p {
+			return true
+		}
+	}
+	return false
+}
