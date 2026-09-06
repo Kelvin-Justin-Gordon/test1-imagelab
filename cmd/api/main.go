@@ -9,7 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lewisdalwin/gatekeeper/internal/data"
+	"github.com/Kelvin-Justin-Gordon/test1-imagelab/internal/data"
+	"github.com/Kelvin-Justin-Gordon/test1-imagelab/internal/storage"
 	_ "github.com/lib/pq"
 )
 
@@ -18,6 +19,8 @@ type config struct {
 	env                string
 	reportDelay        time.Duration
 	workerPollInterval time.Duration
+	uploadDir          string
+	frontendDir        string
 	db                 struct {
 		dsn          string
 		maxOpenConns int
@@ -27,10 +30,11 @@ type config struct {
 }
 
 type application struct {
-	config config
-	logger *slog.Logger
-	models data.Models
-	wg     sync.WaitGroup
+	config       config
+	logger       *slog.Logger
+	models       data.Models
+	originals    *storage.OriginalStore
+	wg           sync.WaitGroup
 	workerCancel context.CancelFunc
 }
 
@@ -41,6 +45,8 @@ func main() {
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.DurationVar(&cfg.reportDelay, "report-delay", 0, "Artificial report-generation delay inside the worker")
 	flag.DurationVar(&cfg.workerPollInterval, "worker-poll-interval", 250*time.Millisecond, "Worker queue-check interval")
+	flag.StringVar(&cfg.uploadDir, "upload-dir", "./uploads/originals", "Directory where uploaded originals are stored")
+	flag.StringVar(&cfg.frontendDir, "frontend-dir", "./frontend", "Directory of static frontend files to serve")
 
 	flag.StringVar(&cfg.db.dsn, "db-dsn", "", "PostgreSQL DSN")
 
@@ -48,9 +54,7 @@ func main() {
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.DurationVar(&cfg.db.maxIdleTime, "db-max-idle-time", 15*time.Minute, "PostgreSQL max connection idle time")
 
-	
 	flag.Parse()
-
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
@@ -63,16 +67,20 @@ func main() {
 
 	logger.Info("database connection pool established")
 
-	app := &application{
-		config: cfg,
-		logger: logger,
-		models: data.NewModels(db),
+	//NewOriginalStore creates cfg.uploadDir if it doesn't exist yet
+	originals, err := storage.NewOriginalStore(cfg.uploadDir)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
+	logger.Info("original image store ready", "dir", cfg.uploadDir)
 
-	workerCtx, cancelWorker := context.WithCancel(context.Background())
-	app.workerCancel = cancelWorker
-	defer cancelWorker()
-	app.startReportWorker(workerCtx)
+	app := &application{
+		config:    cfg,
+		logger:    logger,
+		models:    data.NewModels(db),
+		originals: originals,
+	}
 
 	err = app.serve()
 	if err != nil {
@@ -80,7 +88,7 @@ func main() {
 		os.Exit(1)
 	}
 }
-	
+
 func openDB(cfg config) (*sql.DB, error) {
 	db, err := sql.Open("postgres", cfg.db.dsn)
 	if err != nil {
