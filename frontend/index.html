@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImageLab</title>
+    <link rel ="stylesheet" href="style.css"/>
+</head>
+<body>
+    <main class="app">
+        <header class="app__header">
+            <h1>ImageLab</h1>
+            <p class="app__tagline">Select an image, submit it, and watch it process.</p>
+        </header>
 
+        <!-- Selection & preview -->
+         <section class ="panel" id="selection-panel">
+            <label class="file-drop" for="file-input">
+                <input type="file" id="file-input" accept="image/jpeg,image/png" hidden/>
+                <span id="file-drop-label"> Choose a JPEG or PNG (max 10&nbsp;MB)</span>
+            </label>
+
+            <div id="preview-area" class="preview-area" hidden>
+                <img id="preview-image" alt="Selected image preview"/>
+                <dl class="preview-meta">
+                    <dt>File</dt><dd id="preview-filename"></dd>
+                    <dt>Size</dt><dd id="preview-size"></dd>
+                    <dt>Type</dt><dd id="preview-type"></dd>
+                </dl>
+                <button type="button" id="change-file-btn" class="btn btn--secondary">Choose another file</button>
+            </div>
+
+            <p id="validation-error" class="error-type" hidden></p>
+
+            <button type="button" id="process-btn" class="btn btn--primary" disabled>Process image</button>
+         </section>
+
+         <!-- Job/Status card -->
+          <section class="panel" id="job-panel" hidden>
+            <h2>Job Status</h2>
+            <p id="job-id-line"></p>
+            <p id="job-status-line"></p>
+          </section>
+
+          <!-- Results -->
+           <section class="panel" id="results-panel">
+            <h2>Results</h2>
+            <p id="results-empty-line">No images generated yet</p>
+            <div id="results-grid" class="results-grid" hidden></div>
+           </section>
+    </main>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
