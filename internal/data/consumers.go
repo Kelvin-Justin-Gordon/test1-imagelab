@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/lewisdalwin/gatekeeper/internal/validator"
+	"github.com/Kelvin-Justin-Gordon/test1-imagelab/internal/validator"
 	"github.com/lib/pq"
 )
 
