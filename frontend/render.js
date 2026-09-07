@@ -6,6 +6,7 @@ const els = {
     previewImage: document.getElementById("preview-image"),
     previewFilename: document.getElementById("preview-filename"),
     previewSize: document.getElementById("preview-size"),
+    previewType: document.getElementById("preview-type"),
     validationError: document.getElementById("validation-error"),
     processBtn: document.getElementById("process-btn"),
     jobPanel: document.getElementById("job-panel"),
