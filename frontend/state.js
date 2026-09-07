@@ -26,9 +26,8 @@ export function clearSelection(){
     state.previewUrl = null;
     state.validationError = null;
     state.uploadError = null;
-    state.uploadError = null;
     state.storedImage = null;
-    state.job;
+    state.job = null;
 }
 
 export function setValidationError(message){
