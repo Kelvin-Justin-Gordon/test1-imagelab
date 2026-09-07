@@ -1,0 +1,93 @@
+:root {
+  --bg: #0f1115;
+  --panel-bg: #171a21;
+  --border: #2a2f3a;
+  --text: #e7e9ee;
+  --muted: #9aa2b1;
+  --accent: #4f8cff;
+  --danger: #ff5c5c;
+  --success: #3ecf8e;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+.app__header h1 { margin-bottom: 0.25rem; }
+.app__tagline { color: var(--muted); margin-top: 0; }
+
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.file-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 2rem 1rem;
+  cursor: pointer;
+  color: var(--muted);
+  text-align: center;
+}
+
+.file-drop:hover { border-color: var(--accent); color: var(--text); }
+
+.preview-area { margin-top: 1rem; }
+.preview-area img {
+  max-width: 100%;
+  max-height: 320px;
+  border-radius: var(--radius);
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.preview-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.75rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0 0 0.75rem;
+}
+.preview-meta dt { font-weight: 600; color: var(--text); }
+.preview-meta dd { margin: 0; }
+
+.btn {
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.6rem 1.1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.btn--primary { background: var(--accent); color: #fff; margin-top: 1rem; width: 100%; }
+.btn--primary:disabled { background: #33384a; color: var(--muted); cursor: not-allowed; }
+.btn--secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+
+.error-text { color: var(--danger); font-size: 0.9rem; }
+
+#results-empty-line { color: var(--muted); }
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
