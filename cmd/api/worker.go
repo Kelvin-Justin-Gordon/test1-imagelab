@@ -6,7 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
+
+	"github.com/Kelvin-Justin-Gordon/test1-imagelab/internal/data"
 )
+
+// reportJobType identifies this worker's queue.
+const reportJobType = "consumer_activity_report"
 
 func (app *application) startReportWorker(ctx context.Context) {
 	app.wg.Add(1)
@@ -30,7 +35,7 @@ func (app *application) startReportWorker(ctx context.Context) {
 }
 
 func (app *application) processNextReportJob(ctx context.Context) error {
-	job, err := app.models.Jobs.ClaimNext(ctx)
+	job, err := app.models.Jobs.ClaimNext(ctx, reportJobType)
 	if err != nil {
 		return err
 	}
@@ -48,14 +53,25 @@ func (app *application) processNextReportJob(ctx context.Context) error {
 		}
 	}
 
-	report, err := app.models.Reports.Generate(job.ConsumerID, job.Payload.From, job.Payload.To)
+	//Decode the raw JSON Payload into the shape that the job type expects
+	var payload data.ReportPayload
+	if err := json.Unmarshal(job.Payload, &payload); err != nil {
+		return app.models.Jobs.MarkFailed(ctx, job.ID, err.Error())
+	}
+	if job.ConsumerID == nil {
+		return app.models.Jobs.MarkFailed(ctx, job.ID, "report job missing consumer_id")
+	}
+
+	report, err := app.models.Reports.Generate(*job.ConsumerID, payload.From, payload.To)
 	if err != nil {
 		return app.models.Jobs.MarkFailed(ctx, job.ID, err.Error())
 	}
+
 	result, err := json.Marshal(report)
 	if err != nil {
 		return app.models.Jobs.MarkFailed(ctx, job.ID, err.Error())
 	}
+
 	if err := app.models.Jobs.MarkCompleted(ctx, job.ID, result); err != nil {
 		return err
 	}
