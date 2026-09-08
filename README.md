@@ -1,4 +1,5 @@
 # ImageLab — Assessment 1 (Version 1)
+### KELVIN GORDON & TERYN GUZMAN
 
 Async `202 Accepted` + durable Job + one worker + 1-second short polling,
 applied to image upload and variant generation. Built by extending the

@@ -1,6 +1,5 @@
 ## Week 1
-
-**Completed since last check-in**
+### KELVIN GORDON & TERYN GUZMAN
 
 - Copied and understood the supplied Gatekeeper starter code (Go backend,
   original migrations, project structure)
