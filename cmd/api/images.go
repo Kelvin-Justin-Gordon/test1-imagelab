@@ -8,6 +8,7 @@ import (
 	_ "image/png"  // registers the PNG decoder with image.DecodeConfig
 	"io"
 	"net/http"
+	"os"
 
 	"github.com/Kelvin-Justin-Gordon/test1-imagelab/internal/data"
 	"github.com/Kelvin-Justin-Gordon/test1-imagelab/internal/validator"
@@ -79,6 +80,7 @@ func (app *application) createImageHandler(w http.ResponseWriter, r *http.Reques
 		SizeBytes:        sizeBytes,
 	}
 	if err := app.models.Images.Insert(img); err != nil {
+		os.Remove(app.originals.Path(storedFilename))
 		app.serverErrorResponse(w, r, err)
 		return
 	}

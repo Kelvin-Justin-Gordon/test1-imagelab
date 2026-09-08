@@ -9,12 +9,21 @@
 <body>
     <main class="app">
         <header class="app__header">
+            <div>
             <h1>ImageLab</h1>
             <p class="app__tagline">Select an image, submit it, and watch it process.</p>
+            </div>
+            <span class="badge">Week 1</span>
         </header>
 
+        <h2>Process an image</h2>
+        <p class="muted">Select a JPEG or PNG to store it.</p>
+
         <!-- Selection & preview -->
+         <div class="grid">
          <section class ="panel" id="selection-panel">
+            <h3 class="panel__title">Upload image</h3>
+
             <label class="file-drop" for="file-input">
                 <input type="file" id="file-input" accept="image/jpeg,image/png" hidden/>
                 <span id="file-drop-label"> Choose a JPEG or PNG (max 10&nbsp;MB)</span>
@@ -30,21 +39,27 @@
                 <button type="button" id="change-file-btn" class="btn btn--secondary">Choose another file</button>
             </div>
 
-            <p id="validation-error" class="error-type" hidden></p>
+            <p id="validation-error" class="error-text" hidden></p>
 
             <button type="button" id="process-btn" class="btn btn--primary" disabled>Process image</button>
          </section>
 
+         <div class="panel panel--placeholder">
+         <h3 class="panel__title">Processing job</h3>
+         <p class="empty-state">No active job</p>
+         <p class="muted">Upload an image to store it</p>
+        </div>
+
          <!-- Job/Status card -->
           <section class="panel" id="job-panel" hidden>
-            <h2>Job Status</h2>
+            <h3 class="panel__title">Job Status</h3>
             <p id="job-id-line"></p>
-            <p id="job-status-line"></p>
+            <p id="job-status-line" class="muted"></p>
           </section>
 
           <!-- Results -->
-           <section class="panel" id="results-panel">
-            <h2>Results</h2>
+           <section class="panel panel--wide" id="results-panel">
+            <h3 class="panel__title">Generated images</h3>
             <p id="results-empty-line">No images generated yet</p>
             <div id="results-grid" class="results-grid" hidden></div>
            </section>

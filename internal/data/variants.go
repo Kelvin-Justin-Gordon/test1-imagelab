@@ -13,8 +13,8 @@ type Variant struct {
 	ImageID        string    `json:"-"`
 	Name           string    `json:"name"`
 	StoredFilename string    `json:"-"`
-	Width          string    `json:"width"`
-	Height         string    `json:"height"`
+	Width          int       `json:"width"`
+	Height         int       `json:"height"`
 	SizeBytes      int64     `json:"-"`
 	URL            string    `json:"url,omitempty"`
 	CreatedAt      time.Time `json:"-"`
@@ -52,7 +52,7 @@ func (m VariantModel) GetByImageID(imageID string) ([]Variant, error) {
 	var variants []Variant
 	for rows.Next() {
 		var v Variant
-		if err := rows.Scan(&v.ID, &v.ImageID, &v.Name, &v.StoredFilename, &v.Width, &v.Height, &v.CreatedAt); err != nil {
+		if err := rows.Scan(&v.ID, &v.ImageID, &v.Name, &v.StoredFilename, &v.Width, &v.Height, &v.SizeBytes, &v.CreatedAt); err != nil {
 			return nil, err
 		}
 		variants = append(variants, v)

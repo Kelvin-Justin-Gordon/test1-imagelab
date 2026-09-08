@@ -7,7 +7,7 @@ import {
 } from "./state.js";
 
 import { render } from "./render.js";
-import { uploadImage, ApiError } from "./modules/data-service";
+import { uploadImage, ApiError } from "./modules/data-service.js";
 
 const fileInput = document.getElementById("file-input");
 const changeFileBtn = document.getElementById("change-file-btn");
@@ -18,7 +18,7 @@ fileInput.addEventListener("change", ()=> {
     const file = fileInput.files[0];
     if(!file) return;
 
-    const previewUrl = URL.createdObjectURL(file);
+    const previewUrl = URL.createObjectURL(file);
     setSelectedFile(file, previewUrl);
 
     const error = validateFileLocally(file);
@@ -34,7 +34,7 @@ changeFileBtn.addEventListener("click", ()=>{
     render();
 });
 
-processBtn.addEventListener("click", SubmitImage);
+processBtn.addEventListener("click", submitImage);
 
 async function submitImage(){
     if(state.isSubmitting) return;
